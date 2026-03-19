@@ -13,50 +13,31 @@ export default async function LoginPage() {
     redirect("/dashboard");
   }
 
+  const ready = firebaseClientReady && firebaseAdminReady;
+
   return (
     <main className="shell">
-      <div className="page">
+      <div className="page" style={{ maxWidth: 480, margin: "0 auto" }}>
         <section className="hero">
-          <span className="eyebrow">Multi-user auth</span>
-          <div className="hero-grid">
-            <div>
-              <h1>Give every NHRA operator their own connector workspace.</h1>
-              <p>
-                Sign in with Firebase email/password auth. Each user gets a
-                personal workspace and private connector settings stored in
-                Firestore.
+          <span className="eyebrow">NHRA Content Intelligence</span>
+          <h1 style={{ fontSize: "clamp(2rem,5vw,3rem)", marginTop: 16, marginBottom: 8 }}>
+            Sign in
+          </h1>
+          <p className="copy" style={{ marginBottom: 28 }}>
+            Access your race-week content dashboard and connector workspace.
+          </p>
+
+          {!ready && (
+            <div className="list-item" style={{ marginBottom: 20, borderColor: "rgba(255,111,60,0.35)" }}>
+              <p style={{ margin: 0, color: "var(--warning)", fontSize: "0.9rem" }}>
+                {!firebaseClientReady && "Firebase client config not found. "}
+                {!firebaseAdminReady && "Firebase Admin config not found. "}
+                Check environment variables.
               </p>
-              <div className="list auth-notes">
-                <article className="list-item">
-                  <h3>Firebase web app</h3>
-                  <p>
-                    The public Firebase web config is already loaded into
-                    `.env.local`.
-                  </p>
-                </article>
-                <article className="list-item">
-                  <h3>Still needed</h3>
-                  <p>
-                    Add `FIREBASE_ADMIN_PROJECT_ID`,
-                    `FIREBASE_ADMIN_CLIENT_EMAIL`, and
-                    `FIREBASE_ADMIN_PRIVATE_KEY` to `.env.local`, then enable
-                    Email/Password auth in Firebase.
-                  </p>
-                </article>
-                <article className="list-item">
-                  <h3>Status</h3>
-                  <p>
-                    Client config: {firebaseClientReady ? "ready" : "missing"}.
-                    Admin config: {firebaseAdminReady ? "ready" : "missing"}.
-                  </p>
-                </article>
-              </div>
             </div>
-            <AuthForm
-              firebaseReady={firebaseClientReady}
-              serverReady={firebaseAdminReady}
-            />
-          </div>
+          )}
+
+          <AuthForm firebaseReady={firebaseClientReady} serverReady={firebaseAdminReady} />
         </section>
       </div>
     </main>

@@ -81,15 +81,11 @@ export function AuthForm({ firebaseReady, serverReady }: AuthFormProps) {
 
   return (
     <section className="panel auth-panel">
-      <div className="section-title">
-        <div>
-          <h2>{mode === "login" ? "Sign in" : "Create account"}</h2>
-          <p>
-            Each user gets a personal workspace and their own connector set.
-          </p>
-        </div>
-        <span className="pill">{status}</span>
-      </div>
+      {!(firebaseReady && serverReady) ? null : (
+        <p className="small" style={{ margin: "0 0 18px", color: "var(--muted)" }}>
+          {status}
+        </p>
+      )}
 
       <div className="stack auth-form">
         {mode === "signup" ? (
