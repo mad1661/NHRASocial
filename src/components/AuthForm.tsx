@@ -21,24 +21,22 @@ export function AuthForm({ firebaseReady, serverReady }: AuthFormProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [status, setStatus] = useState(
-    firebaseReady && serverReady
-      ? "Sign in to access your own connector workspace."
-      : !firebaseReady
-        ? "Firebase client configuration is missing."
-        : "Firebase admin configuration is missing.",
-  );
+  const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const ready = firebaseReady && serverReady;
+
+  function toggleMode() {
+    setMode((current) => (current === "login" ? "signup" : "login"));
+    setError("");
+  }
 
   async function createServerSession(idToken: string, displayName?: string) {
     const response = await fetch("/api/auth/session", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ idToken, displayName }),
     });
-
     if (!response.ok) {
       const payload = (await response.json()) as { error?: string };
       throw new Error(payload.error ?? "Could not create the app session.");
@@ -46,12 +44,9 @@ export function AuthForm({ firebaseReady, serverReady }: AuthFormProps) {
   }
 
   async function onSubmit() {
-    if (!firebaseReady || !serverReady) {
-      return;
-    }
-
+    if (!ready) return;
+    setError("");
     setIsSubmitting(true);
-    setStatus(mode === "login" ? "Signing in..." : "Creating account...");
 
     try {
       const auth = getFirebaseClientAuth();
@@ -68,38 +63,28 @@ export function AuthForm({ firebaseReady, serverReady }: AuthFormProps) {
       await createServerSession(idToken, credential.user.displayName ?? name.trim());
       router.push("/dashboard");
       router.refresh();
-    } catch (error) {
-      setStatus(
-        error instanceof Error ? error.message : "Authentication failed.",
-      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Authentication failed.");
       setIsSubmitting(false);
-      return;
     }
-
-    setIsSubmitting(false);
   }
 
   return (
-    <section className="panel auth-panel">
-      {!(firebaseReady && serverReady) ? null : (
-        <p className="small" style={{ margin: "0 0 18px", color: "var(--muted)" }}>
-          {status}
-        </p>
-      )}
-
-      <div className="stack auth-form">
-        {mode === "signup" ? (
+    <section className="panel" style={{ marginTop: 8 }}>
+      <div className="stack">
+        {mode === "signup" && (
           <label className="settings-field">
             <span className="metric-label">Name</span>
             <input
               className="settings-input"
               type="text"
               value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder="Team member name"
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your name"
+              autoComplete="name"
             />
           </label>
-        ) : null}
+        )}
 
         <label className="settings-field">
           <span className="metric-label">Email</span>
@@ -107,8 +92,9 @@ export function AuthForm({ firebaseReady, serverReady }: AuthFormProps) {
             className="settings-input"
             type="email"
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="you@nhra.com"
+            autoComplete="email"
           />
         </label>
 
@@ -118,44 +104,42 @@ export function AuthForm({ firebaseReady, serverReady }: AuthFormProps) {
             className="settings-input"
             type="password"
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder="Minimum 6 characters"
+            autoComplete={mode === "login" ? "current-password" : "new-password"}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") void onSubmit();
+            }}
           />
         </label>
 
-        <div className="hero-actions">
-          <button
-            className="button"
-            type="button"
-            disabled={isSubmitting || !firebaseReady || !serverReady}
-            onClick={() => {
-              void onSubmit();
-            }}
-          >
-            {isSubmitting
-              ? mode === "login"
-                ? "Signing in..."
-                : "Creating account..."
-              : mode === "login"
-                ? "Sign in"
-                : "Create account"}
-          </button>
+        {error && (
+          <p style={{ margin: 0, color: "var(--danger)", fontSize: "0.9rem" }}>
+            {error}
+          </p>
+        )}
 
-          <button
-            className="button-secondary"
-            type="button"
-            disabled={isSubmitting}
-            onClick={() =>
-              setMode((current) =>
-                current === "login" ? "signup" : "login",
-              )
-            }
-          >
-            {mode === "login"
-              ? "Need an account?"
-              : "Already have an account?"}
-          </button>
-        </div>
+        <button
+          className="button"
+          type="button"
+          disabled={isSubmitting || !ready}
+          onClick={() => void onSubmit()}
+          style={{ width: "100%", textAlign: "center" }}
+        >
+          {isSubmitting
+            ? mode === "login" ? "Signing in…" : "Creating account…"
+            : mode === "login" ? "Sign in" : "Create account"}
+        </button>
+
+        <button
+          className="button-secondary"
+          type="button"
+          disabled={isSubmitting}
+          onClick={toggleMode}
+          style={{ width: "100%", textAlign: "center", cursor: "pointer" }}
+        >
+          {mode === "login" ? "Need an account? Sign up" : "Already have an account? Sign in"}
+        </button>
       </div>
     </section>
   );
