@@ -26,8 +26,9 @@ export function AuthForm({ firebaseReady, serverReady }: AuthFormProps) {
 
   const ready = firebaseReady && serverReady;
 
-  function toggleMode() {
-    setMode((current) => (current === "login" ? "signup" : "login"));
+  function switchMode(next: "login" | "signup") {
+    if (next === mode) return;
+    setMode(next);
     setError("");
   }
 
@@ -70,77 +71,88 @@ export function AuthForm({ firebaseReady, serverReady }: AuthFormProps) {
   }
 
   return (
-    <section className="panel" style={{ marginTop: 8 }}>
-      <div className="stack">
+    <div className="auth-tabs-wrapper">
+      {/* Tab switcher */}
+      <div className="auth-tabs" role="tablist">
+        <button
+          className={`auth-tab${mode === "login" ? " auth-tab--active" : ""}`}
+          role="tab"
+          aria-selected={mode === "login"}
+          type="button"
+          onClick={() => switchMode("login")}
+        >
+          Sign in
+        </button>
+        <button
+          className={`auth-tab${mode === "signup" ? " auth-tab--active" : ""}`}
+          role="tab"
+          aria-selected={mode === "signup"}
+          type="button"
+          onClick={() => switchMode("signup")}
+        >
+          Create account
+        </button>
+      </div>
+
+      {/* Form */}
+      <div className="auth-form-body">
         {mode === "signup" && (
-          <label className="settings-field">
-            <span className="metric-label">Name</span>
+          <label className="auth-field">
+            <span className="auth-label">Name</span>
             <input
-              className="settings-input"
+              className="auth-input"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Your name"
               autoComplete="name"
+              disabled={isSubmitting}
             />
           </label>
         )}
 
-        <label className="settings-field">
-          <span className="metric-label">Email</span>
+        <label className="auth-field">
+          <span className="auth-label">Email</span>
           <input
-            className="settings-input"
+            className="auth-input"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@nhra.com"
             autoComplete="email"
+            disabled={isSubmitting}
           />
         </label>
 
-        <label className="settings-field">
-          <span className="metric-label">Password</span>
+        <label className="auth-field">
+          <span className="auth-label">Password</span>
           <input
-            className="settings-input"
+            className="auth-input"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Minimum 6 characters"
             autoComplete={mode === "login" ? "current-password" : "new-password"}
+            disabled={isSubmitting}
             onKeyDown={(e) => {
               if (e.key === "Enter") void onSubmit();
             }}
           />
         </label>
 
-        {error && (
-          <p style={{ margin: 0, color: "var(--danger)", fontSize: "0.9rem" }}>
-            {error}
-          </p>
-        )}
+        {error && <p className="auth-error">{error}</p>}
 
         <button
-          className="button"
+          className="auth-submit"
           type="button"
           disabled={isSubmitting || !ready}
           onClick={() => void onSubmit()}
-          style={{ width: "100%", textAlign: "center" }}
         >
           {isSubmitting
             ? mode === "login" ? "Signing in…" : "Creating account…"
             : mode === "login" ? "Sign in" : "Create account"}
         </button>
-
-        <button
-          className="button-secondary"
-          type="button"
-          disabled={isSubmitting}
-          onClick={toggleMode}
-          style={{ width: "100%", textAlign: "center", cursor: "pointer" }}
-        >
-          {mode === "login" ? "Need an account? Sign up" : "Already have an account? Sign in"}
-        </button>
       </div>
-    </section>
+    </div>
   );
 }
