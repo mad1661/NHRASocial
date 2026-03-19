@@ -15,9 +15,13 @@ const bodyFont = IBM_Plex_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "NHRA Content Intelligence Autoresearch",
+  title: "NHRA Content Intelligence",
   description:
     "A race-week content intelligence dashboard for what is working now, who is winning attention, and what NHRA should post next.",
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({
