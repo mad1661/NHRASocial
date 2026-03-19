@@ -1,0 +1,6 @@
+.env.local
+nhrasocial-firebase-adminsdk-fbsvc-2bec68cf1a.json
+.next
+.next-build
+node_modules
+.data
