@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 
 import { AuthForm } from "@/components/AuthForm";
 import { getCurrentUserContext } from "@/lib/auth/session";
-import { hasFirebaseAdminConfig, hasFirebaseClientConfig } from "@/lib/env";
+import { hasFirebaseAdminConfig } from "@/lib/env";
+import { hasFirebaseClientConfig } from "@/lib/firebase/client";
 
 export default async function LoginPage() {
   const currentUser = await getCurrentUserContext();

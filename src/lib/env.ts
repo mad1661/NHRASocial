@@ -29,17 +29,6 @@ export const appEnv = {
   nhraEventFeedUrl: readOptional("NHRA_EVENT_FEED_URL"),
 };
 
-export function hasFirebaseClientConfig() {
-  return Boolean(
-    appEnv.firebaseApiKey &&
-      appEnv.firebaseAuthDomain &&
-      appEnv.firebaseProjectId &&
-      appEnv.firebaseStorageBucket &&
-      appEnv.firebaseMessagingSenderId &&
-      appEnv.firebaseAppId,
-  );
-}
-
 export function hasFirebaseAdminConfig() {
   return Boolean(
     appEnv.firebaseAdminProjectId &&
