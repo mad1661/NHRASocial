@@ -8,14 +8,13 @@ import {
   updateProfile,
 } from "firebase/auth";
 
-import { getFirebaseClientAuth } from "@/lib/firebase/client";
+import { getFirebaseClientAuth, hasFirebaseClientConfig } from "@/lib/firebase/client";
 
 interface AuthFormProps {
-  firebaseReady: boolean;
   serverReady: boolean;
 }
 
-export function AuthForm({ firebaseReady, serverReady }: AuthFormProps) {
+export function AuthForm({ serverReady }: AuthFormProps) {
   const router = useRouter();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [name, setName] = useState("");
@@ -24,6 +23,9 @@ export function AuthForm({ firebaseReady, serverReady }: AuthFormProps) {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Check client-side Firebase readiness here so the server
+  // never influences this value — avoids hydration mismatches.
+  const firebaseReady = hasFirebaseClientConfig();
   const ready = firebaseReady && serverReady;
 
   function switchMode(next: "login" | "signup") {
@@ -139,6 +141,12 @@ export function AuthForm({ firebaseReady, serverReady }: AuthFormProps) {
             }}
           />
         </label>
+
+        {!ready && !error && (
+          <p className="auth-error" style={{ borderColor: "rgba(255,179,71,0.3)", background: "rgba(255,179,71,0.08)", color: "var(--warning)" }}>
+            {!firebaseReady ? "Firebase client config not found in bundle." : "Firebase Admin config missing on server."}
+          </p>
+        )}
 
         {error && <p className="auth-error">{error}</p>}
 
